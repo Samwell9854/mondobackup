@@ -1,5 +1,4 @@
 #!/bin/sh
-#
 
 # NEED TO SET THESE VALUES
 # Client name (prefix of ISO file)
@@ -12,6 +11,8 @@ rotate=2
 # CHANGE_USR (username for ftp upload)
 # CHANGE_PWD (password for ftp upload)
 # CHANGE_FTP (ftp location to upload)
+# CHANGE_SPD (bandwidth to allocate upload, accepts natural
+# numbers, followed by "b,k,m,g", capitals OK, check curl manual)
 
 # Current date
 currentDate=$(date +%y%m)
@@ -29,7 +30,7 @@ umount /run/media/root/*
 
 # Sending archive(s) to Lauserco
 for i in /var/cache/mondo/$client-$currentDate* ; do
-	curl -u 'CHANGE_USR:CHANGE_PWD' --limit-rate 3M -T $i ftp://CHANGE_FTP/$folder/ && echo -n ${i##*/} >> /var/cache/mondo/rotate.txt && echo -n ' ' >> /var/cache/mondo/rotate.txt
+	curl -u 'CHANGE_USR:CHANGE_PWD' --limit-rate CHANGE_SPD -T $i ftp://CHANGE_FTP/$folder/ && echo -n ${i##*/} >> /var/cache/mondo/rotate.txt && echo -n ' ' >> /var/cache/mondo/rotate.txt
 	echo -n ${i##*/} >> /var/cache/mondo/rotate.txt && echo -n ' ' >> /var/cache/mondo/rotate.txt
 done
 echo -ne \\n >> /var/cache/mondo/rotate.txt
