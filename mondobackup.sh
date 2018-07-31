@@ -2,17 +2,16 @@
 
 # NEED TO SET THESE VALUES
 # Client name (prefix of ISO file)
-client=lauserco
-# Folder name (matches FTP folder of ftp.lauserco.com)
-folder=lauserco
+client=
+# Folder name (matches FTP folder)
+folder=
 # Amount of backups to keep (backup rotation)
 rotate=2
 # Change these values in script:
-# CHANGE_USR (username for ftp upload)
-# CHANGE_PWD (password for ftp upload)
-# CHANGE_FTP (ftp location to upload)
-# CHANGE_SPD (bandwidth to allocate upload, accepts natural
-# numbers, followed by "b,k,m,g", capitals OK, check curl manual)
+# CHANGE_USR (username for FTP upload)
+# CHANGE_PWD (password for FTP upload)
+# CHANGE_FTP (FTP location to upload)
+# CHANGE_SPD (bandwidth to allocate upload, check curl manual)
 
 # Current date
 currentDate=$(date +%y%m)
@@ -25,15 +24,17 @@ if [ ! -f /var/cache/mondo/rotate.txt ]; then
 fi
 
 # Creating archive and unmounting Mundo ISOs (cleanup)
-mondoarchive -OVi9FLp $client-$currentDate -s 4470m -d /var/cache/mondo -E /var/cache/mondo
+mondoarchive -OVi9FYp $client-$currentDate -s 4470m -d /var/cache/mondo -E /var/cache/mondo
 umount /run/media/root/*
 
-# Sending archive(s) to Lauserco
+# Sending archive(s)
 for i in /var/cache/mondo/$client-$currentDate* ; do
 	curl -u 'CHANGE_USR:CHANGE_PWD' --limit-rate CHANGE_SPD -T $i ftp://CHANGE_FTP/$folder/ && echo -n ${i##*/} >> /var/cache/mondo/rotate.txt && echo -n ' ' >> /var/cache/mondo/rotate.txt
-	echo -n ${i##*/} >> /var/cache/mondo/rotate.txt && echo -n ' ' >> /var/cache/mondo/rotate.txt
 done
 echo -ne \\n >> /var/cache/mondo/rotate.txt
+
+# Cleaning up local ISO files
+rm /var/cache/mondo/*.iso
 
 # Rotation of backup
 if [ $(wc -l /var/cache/mondo/rotate.txt | awk '{print $1}') -le $rotate ]; then
