@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# TO DO
+# Convert CHANGE_ values as variables
+
+# Set at least 744 permissions on this file to run properly
+
 # NEED TO SET THESE VALUES
 # Client name (prefix of ISO file)
 client=
@@ -24,7 +29,7 @@ if [ ! -f /var/cache/mondo/rotate.txt ]; then
 fi
 
 # Creating archive and unmounting Mundo ISOs (cleanup)
-mondoarchive -OVi9FYp $client-$currentDate -s 4470m -d /var/cache/mondo -E /var/cache/mondo
+/usr/sbin/mondoarchive -OVi9Fp $client-$currentDate -s 4480m -d /var/cache/mondo -E /var/cache/mondo
 umount /run/media/root/*
 
 # Sending archive(s)
