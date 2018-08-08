@@ -12,7 +12,7 @@ rotate=2
 # Username for FTP upload
 usr=
 # Password for FTP upload
-pwd=
+passwd=
 # FTP location to upload
 url=
 # Bandwidth to allocate upload, check curl manual
@@ -36,7 +36,7 @@ umount /run/media/root/*
 
 # Sending archive(s)
 for i in /var/cache/mondo/$client-$currentDate* ; do
-	curl -u '$usr:$pwd' --limit-rate $spd -T $i ftp://$url/$folder/ && echo -n ${i##*/} >> /var/cache/mondo/rotate.txt && echo -n ' ' >> /var/cache/mondo/rotate.txt
+	curl -u $usr:$passwd --limit-rate $spd -T $i ftp://$url/$folder/ && echo -n ${i##*/} >> /var/cache/mondo/rotate.txt && echo -n ' ' >> /var/cache/mondo/rotate.txt
 done
 echo -ne \\n >> /var/cache/mondo/rotate.txt
 
@@ -49,7 +49,7 @@ if [ $(wc -l /var/cache/mondo/rotate.txt | awk '{print $1}') -le $rotate ]; then
 else
 	while [ $(wc -l /var/cache/mondo/rotate.txt | awk '{print $1}') -gt $rotate ]; do
 		for i in $(sed -n 1p /var/cache/mondo/rotate.txt); do
-			curl -u '$usr:$pwd' ftp://$url/$folder/$i -Q "-DELE $i" >/dev/null 2>&1 || break 4
+			curl -u $usr:$passwd ftp://$url/$folder/$i -Q "-DELE $i" >/dev/null 2>&1 || break 4
 		done
 		sed -i '1d' /var/cache/mondo/rotate.txt
 	done
