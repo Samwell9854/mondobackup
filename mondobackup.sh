@@ -1,10 +1,7 @@
 #!/bin/sh
-
-# TO DO
-# Convert CHANGE_ values as variables
-
 # Set at least 744 permissions on this file to run properly
 
+#############################################################################
 # NEED TO SET THESE VALUES
 # Client name (prefix of ISO file)
 client=
@@ -12,11 +9,16 @@ client=
 folder=
 # Amount of backups to keep (backup rotation)
 rotate=2
-# Change these values in script:
-# CHANGE_USR (username for FTP upload)
-# CHANGE_PWD (password for FTP upload)
-# CHANGE_FTP (FTP location to upload)
-# CHANGE_SPD (bandwidth to allocate upload, check curl manual)
+# Username for FTP upload
+usr=
+# Password for FTP upload
+pwd=
+# FTP location to upload
+url=
+# Bandwidth to allocate upload, check curl manual
+# Put number followed with K (KB) or M (MB), no space, small letters OK
+spd=
+#############################################################################
 
 # Current date
 currentDate=$(date +%y%m)
@@ -34,12 +36,12 @@ umount /run/media/root/*
 
 # Sending archive(s)
 for i in /var/cache/mondo/$client-$currentDate* ; do
-	curl -u 'CHANGE_USR:CHANGE_PWD' --limit-rate CHANGE_SPD -T $i ftp://CHANGE_FTP/$folder/ && echo -n ${i##*/} >> /var/cache/mondo/rotate.txt && echo -n ' ' >> /var/cache/mondo/rotate.txt
+	curl -u '$usr:$pwd' --limit-rate $spd -T $i ftp://$url/$folder/ && echo -n ${i##*/} >> /var/cache/mondo/rotate.txt && echo -n ' ' >> /var/cache/mondo/rotate.txt
 done
 echo -ne \\n >> /var/cache/mondo/rotate.txt
 
 # Cleaning up local ISO files
-rm /var/cache/mondo/*.iso
+rm -f /var/cache/mondo/*.iso
 
 # Rotation of backup
 if [ $(wc -l /var/cache/mondo/rotate.txt | awk '{print $1}') -le $rotate ]; then
@@ -47,7 +49,7 @@ if [ $(wc -l /var/cache/mondo/rotate.txt | awk '{print $1}') -le $rotate ]; then
 else
 	while [ $(wc -l /var/cache/mondo/rotate.txt | awk '{print $1}') -gt $rotate ]; do
 		for i in $(sed -n 1p /var/cache/mondo/rotate.txt); do
-			curl -u 'CHANGE_USR:CHANGE_PWD' ftp://CHANGE_FTP/$folder/$i -Q "-DELE $i" >/dev/null 2>&1 || break 4
+			curl -u '$usr:$pwd' ftp://$url/$folder/$i -Q "-DELE $i" >/dev/null 2>&1 || break 4
 		done
 		sed -i '1d' /var/cache/mondo/rotate.txt
 	done
