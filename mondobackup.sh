@@ -49,7 +49,7 @@ if [ $(wc -l /var/cache/mondo/rotate.txt | awk '{print $1}') -le $rotate ]; then
 else
 	while [ $(wc -l /var/cache/mondo/rotate.txt | awk '{print $1}') -gt $rotate ]; do
 		for i in $(sed -n 1p /var/cache/mondo/rotate.txt); do
-			curl -u $usr:$passwd ftp://$url/$folder/$i -Q "-DELE $i" >/dev/null 2>&1 || break 4
+			curl -u $usr:$passwd ftp://$url/ -Q "DELE $folder/$i" >/dev/null 2>&1 || break 4
 		done
 		sed -i '1d' /var/cache/mondo/rotate.txt
 	done
