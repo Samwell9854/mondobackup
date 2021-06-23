@@ -1,24 +1,81 @@
 #!/bin/sh
-# Set at least 744 permissions on this file to run properly
 
-#############################################################################
-# NEED TO SET THESE VALUES
-# Client name (prefix of ISO file)
-client=
-# Folder name (matches FTP folder)
-folder=
-# Amount of backups to keep (backup rotation)
+# Default values for option variables
 rotate=2
-# Username for FTP upload
-usr=
-# Password for FTP upload
-passwd=
-# FTP location to upload
-url=
-# Bandwidth to allocate upload, check curl manual
-# Put number followed with K (KB) or M (MB), no space, small letters OK
-spd=
-#############################################################################
+
+# Usage info
+usage() {
+  cat << EOF
+Usage: mondobackup OPTIONS
+
+General options:
+
+  -c, --client               Client name (prefix of ISO file).
+  -d, --dir                  Directory name (matches FTP folder).
+  -r, --rotate               Amount of backups to keep (backup rotation) [default=2].
+  -u, --username             Username for FTP upload.
+  -p, --password             Password for FTP upload.
+  -U, --url                  FTP location to upload (FQDN only).
+  -R, --rate                 Bandwidth to allocate upload, check curl manual.
+                             Put number followed with K (KB) or M (MB), no space, small letters OK.
+  -h, --help                 Display this help and exit.
+
+EOF
+}
+
+# Parse options
+optspec=":c:d:r:u:p:U:R:h-:"
+while getopts "$optspec" optchar; do
+  case "${optchar}" in
+
+    # Short options
+    c) client=${OPTARG};;
+    d) dir=${OPTARG};;
+    r) rotate=${OPTARG};;
+    u) usr=${OPTARG};;
+    p) passwd=${OPTARG};;
+    U) url=${OPTARG};;
+    R) spd=${OPTARG};;
+    h) usage; exit 0;;
+
+    -)
+      case "${OPTARG}" in
+        # Long options
+        client) client=${OPTARG};;
+        dir) dir=${OPTARG};;
+        rotate) rotate=${OPTARG};;
+        username) usr=${OPTARG};;
+        password) passwd=${OPTARG};;
+        url) url=${OPTARG};;
+        rate) spd=${OPTARG};;
+
+        *)
+          echo "Unknown option --${OPTARG}" >&2
+          usage >&2;
+          exit 1
+          ;;
+      esac;;
+  
+    *)
+      echo "Unknown option -${OPTARG}" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+if [ $# -eq 0 ]; then
+  echo "No options specified."
+  usage
+  exit 1
+fi
+
+shift "$((OPTIND-1))"
+
+if [ -z "$client" ] || [ -z "$dir" ] || [ -z "$usr" ] || [ -z "$passwd" ] || [ -z "$url" ] || [ -z "$rate" ]; then
+  echo "Some arguments are missing."
+  usage
+  exit 1
+fi
 
 # Current date
 currentDate=$(date +%y%m)
@@ -36,7 +93,7 @@ umount /run/media/root/*
 
 # Sending archive(s)
 for i in /var/cache/mondo/$client-$currentDate* ; do
-	curl -u $usr:$passwd --limit-rate $spd -T $i ftp://$url/$folder/ && echo -n ${i##*/} >> /var/cache/mondo/rotate.txt && echo -n ' ' >> /var/cache/mondo/rotate.txt
+	curl -u $usr:$passwd --limit-rate $spd -T $i ftp://$url/$dir/ && echo -n ${i##*/} >> /var/cache/mondo/rotate.txt && echo -n ' ' >> /var/cache/mondo/rotate.txt
 done
 echo -ne \\n >> /var/cache/mondo/rotate.txt
 
@@ -49,7 +106,7 @@ if [ $(wc -l /var/cache/mondo/rotate.txt | awk '{print $1}') -le $rotate ]; then
 else
 	while [ $(wc -l /var/cache/mondo/rotate.txt | awk '{print $1}') -gt $rotate ]; do
 		for i in $(sed -n 1p /var/cache/mondo/rotate.txt); do
-			curl -u $usr:$passwd ftp://$url/ -Q "DELE $folder/$i" >/dev/null 2>&1 || break 4
+			curl -u $usr:$passwd ftp://$url/ -Q "DELE $dir/$i" >/dev/null 2>&1 || break 4
 		done
 		sed -i '1d' /var/cache/mondo/rotate.txt
 	done
