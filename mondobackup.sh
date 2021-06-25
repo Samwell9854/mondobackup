@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Default values for option variables
-rotate=2
+rotate=1
 
 # Usage info
 usage() {
@@ -88,7 +88,7 @@ if [ ! -f /var/cache/mondo/rotate.txt ]; then
 fi
 
 # Creating archive and unmounting Mundo ISOs (cleanup)
-/usr/sbin/mondoarchive -OVi9Fp $client-$currentDate -s 4480m -d /var/cache/mondo -E /var/cache/mondo
+/usr/sbin/mondoarchive -OVi9Fp $client-$currentDate -s 4480m -d /var/cache/mondo -E "/var/cache/mondo|/var/spool/asterisk/voicemail/"
 umount /run/media/root/*
 
 # Sending archive(s)
