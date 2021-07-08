@@ -39,7 +39,8 @@ if [ $# -eq 0 ]; then
     tr '\n' ' ' < cron.tmpa >> cron.tmp
     echo -ne '\n' >> cron.tmp
     crontab cron.tmp
-    rm $mondocron
+    rm -f $mondocron
+    rm -f cron.tmp*
   fi
   install
 fi
