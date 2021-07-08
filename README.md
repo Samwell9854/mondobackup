@@ -4,7 +4,7 @@ Makes ISO file(s), uploads the file(s) to a FTP server, and supports backup rota
 ## Installation
 For first use AND to migrate from previous versions.
 ```bash
-sh +x install.sh
+./install.sh
 ```
 
 ## Usage
@@ -28,5 +28,5 @@ General options:
 ## Uninstall
 
 ```bash
-sh +x install.sh --uninstall
+./install.sh --uninstall
 ```

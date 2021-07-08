@@ -31,9 +31,11 @@ if [ $# -eq 0 ]; then
     echo "-d $(grep folder= $mondocron | cut -d'=' -f2)" >> cron.tmpa
     echo "-r $(grep rotate= $mondocron | cut -d'=' -f2)" >> cron.tmpa
     echo "-u $(grep usr= $mondocron | cut -d'=' -f2)" >> cron.tmpa
-    echo "-p $(grep passwd= $mondocron | cut -d'=' -f2-)" >> cron.tmpa
+    echo -ne "'" >> cron.tmpa
+    echo -ne "-p $(grep passwd= $mondocron | cut -d'=' -f2-)" >> cron.tmpa
+    echo "'" >> cron.tmpa
     echo "-U $(grep url= $mondocron | cut -d'=' -f2)" >> cron.tmpa
-    echo "-R $(grep spd= $mondocron | cut -d'=' -f2)" >> cron.tmpa
+    echo "-R $(grep rate= $mondocron | cut -d'=' -f2)" >> cron.tmpa
     tr '\n' ' ' < cron.tmpa >> cron.tmp
     echo -ne '\n' >> cron.tmp
     crontab cron.tmp

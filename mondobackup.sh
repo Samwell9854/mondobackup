@@ -12,9 +12,10 @@ General options:
 
   -c, --client               Client name (prefix of ISO file).
   -d, --dir                  Directory name (matches FTP folder).
-  -r, --rotate               Amount of backups to keep (backup rotation) [default=2].
+  -r, --rotate               Amount of backups to keep (backup rotation) [default=1].
   -u, --username             Username for FTP upload.
   -p, --password             Password for FTP upload.
+                             Encapsulate inside '' to avoid command substitution.
   -U, --url                  FTP location to upload (FQDN only).
   -R, --rate                 Bandwidth to allocate upload, check curl manual.
                              Put number followed with K (KB) or M (MB), no space, small letters OK.
@@ -35,7 +36,7 @@ while getopts "$optspec" optchar; do
     u) usr=${OPTARG};;
     p) passwd=${OPTARG};;
     U) url=${OPTARG};;
-    R) spd=${OPTARG};;
+    R) rate=${OPTARG};;
     h) usage; exit 0;;
 
     -)
@@ -47,7 +48,7 @@ while getopts "$optspec" optchar; do
         username) usr=${OPTARG};;
         password) passwd=${OPTARG};;
         url) url=${OPTARG};;
-        rate) spd=${OPTARG};;
+        rate) rate=${OPTARG};;
 
         *)
           echo "Unknown option --${OPTARG}" >&2
@@ -72,7 +73,8 @@ fi
 shift "$((OPTIND-1))"
 
 if [ -z "$client" ] || [ -z "$dir" ] || [ -z "$usr" ] || [ -z "$passwd" ] || [ -z "$url" ] || [ -z "$rate" ]; then
-  echo "Some arguments are missing."
+  echo "Missing or invalid argument."
+  echo
   usage
   exit 1
 fi
@@ -93,7 +95,7 @@ umount /run/media/root/*
 
 # Sending archive(s)
 for i in /var/cache/mondo/$client-$currentDate* ; do
-	curl -u $usr:$passwd --limit-rate $spd -T $i ftp://$url/$dir/ && echo -n ${i##*/} >> /var/cache/mondo/rotate.txt && echo -n ' ' >> /var/cache/mondo/rotate.txt
+	curl -u $usr:$passwd --limit-rate $rate -T $i ftp://$url/$dir/ && echo -n ${i##*/} >> /var/cache/mondo/rotate.txt && echo -n ' ' >> /var/cache/mondo/rotate.txt
 done
 echo -ne \\n >> /var/cache/mondo/rotate.txt
 
@@ -114,3 +116,4 @@ else
 fi
 echo Did not terminate gracefully
 exit 1
+
