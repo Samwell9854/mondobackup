@@ -16,7 +16,7 @@ General options:
 
   -c, --client               Client name (prefix of ISO file).
   -d, --dir                  Directory name (matches FTP folder).
-  -r, --rotate               Amount of backups to keep (backup rotation) [default=2].
+  -r, --rotate               Amount of backups to keep (backup rotation) [default=1].
   -u, --username             Username for FTP upload.
   -p, --password             Password for FTP upload.
   -U, --url                  FTP location to upload (FQDN only).
